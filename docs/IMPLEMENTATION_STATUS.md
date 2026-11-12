@@ -30,7 +30,7 @@ Legend: ✅ implemented and tested · 🟡 schema only / partial · ⬜ not star
 |---|---|---|
 | Identity / authentication | ✅ | Register, login, refresh rotation and reuse detection, logout (device / everywhere), sessions list/revoke, password reset, change password, `/auth/me`, profile update, lockout, rate limit |
 | Users (administration) | ✅ | Staff creation, profile update (optimistic locking), suspend/deactivate/reactivate, role replacement, department-scoped listing |
-| Roles and permissions | ✅ | 7 system roles, 43 permissions, custom roles, privilege-escalation guard |
+| Roles and permissions | ✅ | 7 system roles, 42 permissions, custom roles, privilege-escalation guard |
 | Departments | ✅ | CRUD, activate/deactivate, membership management, data isolation |
 | Service catalogue | ✅ | Draft → publish (immutable versions) → deprecate; requirements; form schema validation; public catalogue |
 | Audit | ✅ | Append-only log (DB trigger), audit search for AUDITOR (search itself audited) |

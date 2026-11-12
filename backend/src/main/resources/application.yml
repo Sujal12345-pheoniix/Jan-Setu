@@ -118,6 +118,9 @@ jansetu:
       allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
   mail:
     log-body: false
+  storage:
+    # Private directory for uploaded documents (outside any web root). Use object storage in shared deployments.
+    local-dir: ${DOCUMENT_STORAGE_DIR:./storage/documents}
   seed:
     enabled: false
     demo-password: ${SEED_DEMO_PASSWORD:}

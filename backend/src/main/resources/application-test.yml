@@ -9,6 +9,8 @@ jansetu:
       auth-requests-per-minute: 10000
   seed:
     enabled: false
+  storage:
+    local-dir: target/test-storage
 
 logging:
   level:

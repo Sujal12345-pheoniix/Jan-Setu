@@ -13,7 +13,8 @@ import org.junit.jupiter.api.Test;
 /** Enforces the modular-monolith boundaries documented in docs/ARCHITECTURE.md. */
 class ArchitectureTest {
 
-    private static final List<String> MODULES = List.of("access", "audit", "catalogue", "department", "identity");
+    private static final List<String> MODULES = List.of("access", "audit", "catalogue", "department", "identity",
+            "application", "document", "grievance", "notification", "reporting");
     private static JavaClasses classes;
 
     @BeforeAll

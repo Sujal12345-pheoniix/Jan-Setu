@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class StaffMembershipService {
 
     public record MemberView(UUID userId, String email, String fullName, String status, String position,
-                             Instant joinedAt) {
+                             Instant joinedAt, java.util.Set<String> roles) {
     }
 
     private static final Map<String, String> SORTABLE = Map.of("joinedAt", "joinedAt");
@@ -32,28 +32,34 @@ public class StaffMembershipService {
     private final DepartmentMembershipService memberships;
     private final UserAdminService userAdminService;
     private final UserRepository userRepository;
+    private final com.jansetu.modules.access.service.RoleAssignmentService roleAssignments;
 
     public StaffMembershipService(DepartmentMembershipService memberships, UserAdminService userAdminService,
-                                  UserRepository userRepository) {
+                                  UserRepository userRepository,
+                                  com.jansetu.modules.access.service.RoleAssignmentService roleAssignments) {
         this.memberships = memberships;
         this.userAdminService = userAdminService;
         this.userRepository = userRepository;
+        this.roleAssignments = roleAssignments;
     }
 
     @Transactional(readOnly = true)
     public Page<MemberView> members(UUID departmentId, PageQuery pageQuery, AuthenticatedUser actor) {
         Page<MembershipView> page = memberships.members(departmentId,
                 pageQuery.toPageable(SORTABLE, Sort.by(Sort.Direction.ASC, "joinedAt")), actor);
-        Map<UUID, User> users = userRepository.findAllById(page.getContent().stream().map(MembershipView::userId).toList())
+        var ids = page.getContent().stream().map(MembershipView::userId).toList();
+        Map<UUID, User> users = userRepository.findAllById(ids)
                 .stream().collect(Collectors.toMap(User::getId, Function.identity()));
-        return page.map(m -> toView(m, users.get(m.userId())));
+        Map<UUID, java.util.Set<String>> roles = roleAssignments.roleCodesOf(ids);
+        return page.map(m -> toView(m, users.get(m.userId()), roles.getOrDefault(m.userId(), java.util.Set.of())));
     }
 
     @Transactional
     public MemberView addMember(UUID departmentId, UUID userId, String position, AuthenticatedUser actor) {
         actor.requireDepartmentScope(departmentId, "Department"); // scope first: no probing of other departments
         User user = userAdminService.requireActiveStaff(userId);
-        return toView(memberships.addMember(departmentId, userId, position, actor), user);
+        return toView(memberships.addMember(departmentId, userId, position, actor), user,
+                roleAssignments.roleCodesOf(userId));
     }
 
     @Transactional
@@ -61,8 +67,8 @@ public class StaffMembershipService {
         memberships.removeMember(departmentId, userId, actor);
     }
 
-    private static MemberView toView(MembershipView m, User user) {
+    private static MemberView toView(MembershipView m, User user, java.util.Set<String> roles) {
         return new MemberView(m.userId(), user == null ? null : user.getEmail(), user == null ? null : user.getFullName(),
-                user == null ? null : user.getStatus().name(), m.position(), m.joinedAt());
+                user == null ? null : user.getStatus().name(), m.position(), m.joinedAt(), roles);
     }
 }

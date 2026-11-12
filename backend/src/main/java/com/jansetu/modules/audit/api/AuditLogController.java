@@ -56,4 +56,23 @@ public class AuditLogController {
         var filter = new AuditQueryService.AuditFilter(actorId, action, resourceType, resourceId, outcome, from, to);
         return ApiResponse.of(PageResponse.from(queryService.search(filter, page), AuditLogResponse::from));
     }
+
+    @GetMapping(value = "/export", produces = "text/csv")
+    @PreAuthorize("hasAuthority('AUDIT:READ')")
+    @Operation(summary = "Export matching audit records as CSV (max 5000 rows, formula-injection safe; export is audited)")
+    public org.springframework.http.ResponseEntity<String> export(
+            @RequestParam(required = false) UUID actorId,
+            @RequestParam(required = false) String action,
+            @RequestParam(required = false) String resourceType,
+            @RequestParam(required = false) String resourceId,
+            @RequestParam(required = false) AuditOutcome outcome,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant to) {
+        var filter = new AuditQueryService.AuditFilter(actorId, action, resourceType, resourceId, outcome, from, to);
+        return org.springframework.http.ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"audit-log.csv\"")
+                .header(org.springframework.http.HttpHeaders.CACHE_CONTROL, "no-store")
+                .contentType(org.springframework.http.MediaType.parseMediaType("text/csv; charset=UTF-8"))
+                .body(queryService.exportCsv(filter));
+    }
 }

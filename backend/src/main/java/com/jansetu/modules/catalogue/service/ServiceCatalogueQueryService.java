@@ -78,6 +78,40 @@ public class ServiceCatalogueQueryService {
         return new PublishedService(service.getId(), service.getCode(), service.getDepartmentId(), version);
     }
 
+    /** Immutable service-version data for other modules (no entities cross module boundaries). */
+    public record ServiceSnapshot(UUID serviceId, UUID serviceVersionId, UUID departmentId, String code, String name,
+                                  int versionNumber, int processingDays, Map<String, Object> formSchema,
+                                  List<Map<String, Object>> requirements) {
+    }
+
+    /** Latest published version of a service that is currently open for applications. */
+    @Transactional(readOnly = true)
+    public ServiceSnapshot latestPublishedSnapshot(UUID serviceId) {
+        PublishedService p = getPublished(serviceId);
+        return snapshot(p.code(), p.departmentId(), p.version());
+    }
+
+    @Transactional(readOnly = true)
+    public ServiceSnapshot snapshotOfVersion(UUID serviceVersionId) {
+        ServiceVersion version = versionRepository.findById(serviceVersionId)
+                .orElseThrow(() -> ApiException.notFound("Service version"));
+        ServiceDefinition service = serviceRepository.findById(version.getServiceId())
+                .orElseThrow(() -> ApiException.notFound("Service"));
+        return snapshot(service.getCode(), service.getDepartmentId(), version);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<UUID, String> serviceNames(java.util.Collection<UUID> serviceIds) {
+        Map<UUID, String> names = new java.util.HashMap<>();
+        serviceRepository.findAllById(serviceIds).forEach(s -> names.put(s.getId(), s.getName()));
+        return names;
+    }
+
+    private static ServiceSnapshot snapshot(String code, UUID departmentId, ServiceVersion v) {
+        return new ServiceSnapshot(v.getServiceId(), v.getId(), departmentId, code, v.getName(), v.getVersionNumber(),
+                v.getProcessingDays(), v.getFormSchema(), v.getRequirements());
+    }
+
     private static Specification<ServiceVersion> publishedSpecification(PublicFilter filter) {
         return (root, query, cb) -> {
             Subquery<UUID> latest = query.subquery(UUID.class);

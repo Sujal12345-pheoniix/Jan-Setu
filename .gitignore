@@ -35,3 +35,11 @@ storage/
 # Test / reports
 test-results/
 playwright-report/
+
+# Frontend
+frontend/test-results/
+frontend/playwright-report/
+frontend/playwright/.cache/
+
+# Playwright extra output dirs
+frontend/test-results*/

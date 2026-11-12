@@ -130,9 +130,10 @@ public final class IdentityDtos {
     }
 
     public record MemberResponse(UUID userId, String email, String fullName, String status, String position,
-                                 Instant joinedAt) {
+                                 Instant joinedAt, Set<String> roles) {
         static MemberResponse from(MemberView m) {
-            return new MemberResponse(m.userId(), m.email(), m.fullName(), m.status(), m.position(), m.joinedAt());
+            return new MemberResponse(m.userId(), m.email(), m.fullName(), m.status(), m.position(), m.joinedAt(),
+                    new TreeSet<>(m.roles()));
         }
     }
 }

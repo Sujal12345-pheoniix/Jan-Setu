@@ -50,7 +50,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/logout", "/api/v1/auth/forgot-password", "/api/v1/auth/reset-password")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET,
-                                "/api/v1/services", "/api/v1/services/*", "/api/v1/services/*/versions/*")
+                                "/api/v1/services", "/api/v1/services/*", "/api/v1/services/*/versions/*",
+                                "/api/v1/departments/public")
                         .permitAll()
                         .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info",
                                 "/actuator/prometheus")

@@ -13,7 +13,7 @@ Flyway owns the schema. Hibernate runs with `ddl-auto: validate`: it only checks
 | V5 | `V5__applications_documents_workflow_runtime.sql` | `application_reference_seq`, `applications`, `application_status_history`, `application_assignments`, `application_comments`, `application_decisions`, `clarification_requests`, `documents`, `document_versions`, `workflow_instances`, `workflow_tasks`, `workflow_history` |
 | V6 | `V6__grievances.sql` | `grievance_reference_seq`, `grievances`, `grievance_assignments`, `grievance_comments`, `grievance_feedback` |
 | V7 | `V7__notifications_audit_platform_ops.sql` | `notifications`, `notification_preferences`, `audit_logs` (append-only, enforced by trigger), `sla_breaches`, `outbox_events`, `idempotency_records` |
-| V8 | `V8__reference_data_roles_permissions.sql` | 43 permissions, 7 system roles, role→permission matrix |
+| V8 | `V8__reference_data_roles_permissions.sql` | 42 permissions, 7 system roles, role→permission matrix |
 
 V4–V7 create the full data model now, so it can be reviewed as a whole. The Java code that uses those tables arrives in later phases.
 

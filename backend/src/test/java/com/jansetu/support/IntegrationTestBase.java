@@ -106,6 +106,35 @@ public abstract class IntegrationTestBase {
         return login(email, PASSWORD);
     }
 
+    @Autowired
+    protected com.jansetu.modules.catalogue.service.ServiceCatalogueService catalogueService;
+
+    public static final byte[] PDF = "%PDF-1.4\n% JanSetu synthetic test document\n1 0 obj << >> endobj\ntrailer << >>\n%%EOF\n"
+            .getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
+    /**
+     * Publishes a service in {@code departmentId} with fields applicantName (text, required) and annualIncome
+     * (number, required), a mandatory ID_PROOF document and a mandatory TRUTH declaration.
+     */
+    protected UUID publishedService(UUID departmentId) {
+        var system = system();
+        Map<String, Object> schema = Map.of("fields", java.util.List.of(
+                Map.of("key", "applicantName", "label", "Applicant name", "type", "text", "required", true),
+                Map.of("key", "annualIncome", "label", "Annual income", "type", "number", "required", true)));
+        UUID serviceId = catalogueService.create(new com.jansetu.modules.catalogue.service.ServiceCatalogueService.CreateServiceCommand(
+                        departmentId, "SVC_" + uniq().toUpperCase(), "Test Certificate", "Synthetic test service",
+                        "CERTIFICATE", null, 10, java.math.BigDecimal.ZERO, schema),
+                system, null, UUID.class, com.jansetu.modules.catalogue.domain.ServiceDefinition::getId, id -> id).value();
+        catalogueService.addRequirement(serviceId, new com.jansetu.modules.catalogue.service.ServiceCatalogueService.RequirementCommand(
+                "ID_PROOF", "Identity proof", null, com.jansetu.modules.catalogue.domain.RequirementType.DOCUMENT, true,
+                "application/pdf,image/png,image/jpeg", 1_048_576L, 0), system);
+        catalogueService.addRequirement(serviceId, new com.jansetu.modules.catalogue.service.ServiceCatalogueService.RequirementCommand(
+                "TRUTH", "Information is true", null, com.jansetu.modules.catalogue.domain.RequirementType.DECLARATION, true,
+                null, null, 1), system);
+        catalogueService.publish(serviceId, null, system);
+        return serviceId;
+    }
+
     protected TestUser citizen() {
         String email = "citizen." + uniq() + "@example.test";
         authService.register(new AuthService.RegisterCommand(email, PASSWORD, "Test Citizen", null));

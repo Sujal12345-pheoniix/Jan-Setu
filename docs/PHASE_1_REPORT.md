@@ -34,7 +34,7 @@ All 28 documents, 4 ADRs, 2 diagrams and the root files were reviewed. Inconsist
   - password reset (hashed, single-use, 30 minutes, revokes sessions) and password change (invalidates older access tokens);
   - CORS allowlist and security headers.
 - **RBAC and isolation:**
-  - 7 system roles and 43 permissions; `@PreAuthorize` on every protected endpoint;
+  - 7 system roles and 42 permissions; `@PreAuthorize` on every protected endpoint;
   - department scope enforced in services, with 404 for out-of-scope resources;
   - a privilege-escalation guard for granting roles and creating custom roles;
   - system roles cannot be modified through the API.

@@ -59,10 +59,13 @@ public class AuthController {
     private final CurrentUser currentUser;
     private final SecurityProperties properties;
     private final Clock clock;
+    private final com.jansetu.modules.audit.service.AuditQueryService auditQueryService;
 
     public AuthController(AuthService authService, PasswordResetService passwordResetService,
                           AccountService accountService, RefreshSessionService refreshSessionService,
-                          CurrentUser currentUser, SecurityProperties properties, Clock clock) {
+                          CurrentUser currentUser, SecurityProperties properties, Clock clock,
+                          com.jansetu.modules.audit.service.AuditQueryService auditQueryService) {
+        this.auditQueryService = auditQueryService;
         this.authService = authService;
         this.passwordResetService = passwordResetService;
         this.accountService = accountService;
@@ -154,6 +157,17 @@ public class AuthController {
         UUID current = refreshSessionService.sessionIdOf(refreshCookie(http)).orElse(null);
         return ApiResponse.of(accountService.sessions(currentUser.require()).stream()
                 .map(s -> SessionResponse.from(s, current))
+                .toList());
+    }
+
+    public record ActivityItem(java.time.Instant occurredAt, String action, String outcome, String ipAddress) {
+    }
+
+    @GetMapping("/activity")
+    @Operation(summary = "Your recent account activity (last 50 audit events you performed)")
+    public ApiResponse<List<ActivityItem>> activity() {
+        return ApiResponse.of(auditQueryService.recentForActor(currentUser.require().id(), 50).stream()
+                .map(a -> new ActivityItem(a.getOccurredAt(), a.getAction(), a.getOutcome().name(), a.getIpAddress()))
                 .toList());
     }
 

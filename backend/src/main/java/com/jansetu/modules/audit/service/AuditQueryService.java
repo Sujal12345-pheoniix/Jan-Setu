@@ -43,6 +43,44 @@ public class AuditQueryService {
         return page;
     }
 
+    public static final int EXPORT_LIMIT = 5000;
+
+    /** Bounded CSV export of matching audit records (newest first). The export itself is audited. */
+    @Transactional
+    public String exportCsv(AuditFilter filter) {
+        List<AuditLog> rows = repository.findAll(toSpecification(filter),
+                org.springframework.data.domain.PageRequest.of(0, EXPORT_LIMIT, Sort.by(Sort.Direction.DESC, "occurredAt")))
+                .getContent();
+        StringBuilder csv = new StringBuilder("occurredAt,actorId,actorType,action,resourceType,resourceId,outcome,requestId\n");
+        for (AuditLog r : rows) {
+            csv.append(String.join(",", cell(r.getOccurredAt()), cell(r.getActorId()), cell(r.getActorType()),
+                    cell(r.getAction()), cell(r.getResourceType()), cell(r.getResourceId()), cell(r.getOutcome()),
+                    cell(r.getRequestId()))).append('\n');
+        }
+        auditService.record(AuditEvent.success("AUDIT_LOG_EXPORTED", "AUDIT_LOG", null).detail("rows", rows.size()));
+        return csv.toString();
+    }
+
+    /** The signed-in user's own recent account activity (limited, newest first). */
+    @Transactional(readOnly = true)
+    public List<AuditLog> recentForActor(UUID actorId, int limit) {
+        return repository.findAll((root, query, cb) -> cb.equal(root.get("actorId"), actorId),
+                org.springframework.data.domain.PageRequest.of(0, Math.min(limit, 100),
+                        Sort.by(Sort.Direction.DESC, "occurredAt"))).getContent();
+    }
+
+    /** CSV cell with quoting and spreadsheet formula-injection protection. */
+    static String cell(Object value) {
+        if (value == null) {
+            return "";
+        }
+        String text = value.toString();
+        if (!text.isEmpty() && "=+-@\t\r".indexOf(text.charAt(0)) >= 0) {
+            text = "'" + text;
+        }
+        return "\"" + text.replace("\"", "\"\"") + "\"";
+    }
+
     private static Specification<AuditLog> toSpecification(AuditFilter f) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();

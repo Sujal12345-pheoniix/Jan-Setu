@@ -55,6 +55,13 @@ public class DepartmentController {
                 DepartmentResponse::from));
     }
 
+    @GetMapping("/public")
+    @io.swagger.v3.oas.annotations.security.SecurityRequirements
+    @Operation(summary = "Active departments (public: id, code, name)")
+    public ApiResponse<java.util.List<DepartmentService.DepartmentSummary>> publicList() {
+        return ApiResponse.of(departmentService.activeSummaries());
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('DEPARTMENT:READ')")
     @Operation(summary = "Get a department (404 if outside your scope)")

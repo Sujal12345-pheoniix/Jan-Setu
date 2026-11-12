@@ -41,7 +41,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
     ResponseEntity<ProblemDetail> handleApi(ApiException ex, HttpServletRequest request) {
+        if (ex instanceof FieldErrorsProvider provider) {
+            return respond(ProblemDetails.build(ex.errorCode(), ex.errorCode().status(), ex.getMessage(),
+                    request.getRequestURI(), provider.fieldErrors()));
+        }
         return respond(ProblemDetails.build(ex.errorCode(), ex.getMessage(), request.getRequestURI()));
+    }
+
+    /** Implemented by API exceptions that carry field-level problems. */
+    public interface FieldErrorsProvider {
+        List<ProblemDetails.FieldError> fieldErrors();
     }
 
     @ExceptionHandler(BindException.class) // includes MethodArgumentNotValidException

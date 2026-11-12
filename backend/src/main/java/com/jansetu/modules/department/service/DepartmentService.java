@@ -144,6 +144,13 @@ public class DepartmentService {
         return department;
     }
 
+    /** Active departments (id, code, name only) for public pickers such as catalogue filters and grievance forms. */
+    @Transactional(readOnly = true)
+    public List<DepartmentSummary> activeSummaries() {
+        return repository.findAll(Sort.by("name")).stream().filter(Department::isActive)
+                .map(DepartmentService::summary).toList();
+    }
+
     // ---- Public read API for other modules -------------------------------------------------------------------
 
     @Transactional(readOnly = true)
