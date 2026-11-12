@@ -92,19 +92,15 @@ export function NewServicePage() {
   const departments = useQuery({ queryKey: ['departments', 'mine'], queryFn: ({ signal }) => departmentsApi.list({ size: 100, status: 'ACTIVE' }, signal) });
   const [form, setForm] = useState({ departmentId: '', code: '', name: '', description: '', category: 'CERTIFICATE', processingDays: '15', feeAmount: '0', eligibilityText: '' });
   const create = useMutation({
-    mutationFn: () =>
-      servicesApi.create(
-        { ...form, processingDays: Number(form.processingDays), feeAmount: form.feeAmount === '' ? 0 : Number(form.feeAmount), eligibilityText: form.eligibilityText || undefined, formSchema: { fields: [] } },
-        key.current,
-      ),
+    // The payload is built at click time and passed in, so the request always matches what is on screen.
+    mutationFn: (payload: Record<string, unknown>) => servicesApi.create(payload, key.current),
     onSuccess: (s) => {
       notify('Draft service created.');
       navigate(`/admin/services/${s.id}`);
     },
   });
-  useEffect(() => {
-    if (!form.departmentId && departments.data?.content.length) setForm((f) => ({ ...f, departmentId: departments.data!.content[0].id }));
-  }, [departments.data, form.departmentId]);
+  // Derived, not copied into state by an effect: what the dropdown shows is exactly what is submitted.
+  const departmentId = form.departmentId || departments.data?.content[0]?.id || '';
   if (!can('SERVICE:CREATE')) return <Alert tone="error">You cannot create services.</Alert>;
   // Functional updates: never overwrite a value set concurrently (e.g. the default department loaded async).
   const update = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -115,9 +111,24 @@ export function NewServicePage() {
     <div className="max-w-2xl">
       <PageHeader title="New service" breadcrumbs={[{ label: 'Service catalogue', to: '/admin/services' }, { label: 'New' }]} />
       <Card>
-        <form className="space-y-4" noValidate onSubmit={(e) => { e.preventDefault(); create.mutate(); }}>
+        <form
+          className="space-y-4"
+          noValidate
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!departmentId) return; // department list not loaded yet (button is disabled too)
+            create.mutate({
+              ...form,
+              departmentId,
+              processingDays: Number(form.processingDays),
+              feeAmount: form.feeAmount === '' ? 0 : Number(form.feeAmount),
+              eligibilityText: form.eligibilityText || undefined,
+              formSchema: { fields: [] },
+            });
+          }}
+        >
           <FormErrorSummary errors={errorText(create.error)} />
-          <Select label="Department" required value={form.departmentId} onChange={update('departmentId')} options={(departments.data?.content ?? []).map((d) => ({ value: d.id, label: d.name }))} hint={user?.permissions.includes('SCOPE:ALL_DEPARTMENTS') ? undefined : 'Only your departments are listed.'} />
+          <Select label="Department" required value={departmentId} onChange={update('departmentId')} options={(departments.data?.content ?? []).map((d) => ({ value: d.id, label: d.name }))} hint={user?.permissions.includes('SCOPE:ALL_DEPARTMENTS') ? undefined : 'Only your departments are listed.'} />
           <div className="grid gap-4 sm:grid-cols-2">
             <TextInput label="Code" required hint="e.g. BIRTH_CERT" value={form.code} onChange={update('code')} />
             <Select label="Category" required value={form.category} onChange={update('category')} options={CATEGORIES.map((c) => ({ value: c, label: humanize(c) }))} />
@@ -131,7 +142,7 @@ export function NewServicePage() {
           </div>
           <div className="flex justify-end gap-2">
             <LinkButton variant="secondary" to="/admin/services">Cancel</LinkButton>
-            <Button type="submit" loading={create.isPending}>Create draft</Button>
+            <Button type="submit" disabled={!departmentId} loading={create.isPending}>Create draft</Button>
           </div>
         </form>
       </Card>

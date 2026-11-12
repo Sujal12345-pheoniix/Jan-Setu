@@ -32,19 +32,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
  * Creates synthetic demonstration data for local development: departments, published services and (only when
- * {@code SEED_DEMO_PASSWORD} is set) one demo account per role. Runs only in the {@code local} profile, is
+ * {@code SEED_DEMO_PASSWORD} is set) one demo account per role. Opt-in via SEED_ENABLED (always on in the local profile), is
  * idempotent, and goes through the normal services so all business rules and audit logging apply.
  *
  * <p>All names, departments and services are fictional. JanSetu is not an official government portal.
  */
 @Component
-@Profile("local")
 @ConditionalOnProperty(name = "jansetu.seed.enabled", havingValue = "true")
 public class DevDataSeeder implements ApplicationRunner {
 

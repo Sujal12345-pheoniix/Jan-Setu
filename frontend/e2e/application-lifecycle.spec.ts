@@ -99,10 +99,13 @@ test.describe.serial('application lifecycle', () => {
     await page.goto(applicationUrl.replace('/my/', '/work/'));
     await page.getByRole('button', { name: 'Start review' }).click();
     await expect(page.getByRole('button', { name: 'Recommend for approval' })).toBeVisible();
-    for (let i = 0; i < 2; i++) {
-      await page.getByRole('button', { name: 'Mark verified' }).first().click();
-      await expect(page.getByText('Document verified.').first()).toBeVisible();
-    }
+    // verify each document and wait until the list reflects it before the next click
+    const verifyButtons = page.getByRole('button', { name: 'Mark verified' });
+    await expect(verifyButtons).toHaveCount(2);
+    await verifyButtons.first().click();
+    await expect(verifyButtons).toHaveCount(1);
+    await verifyButtons.first().click();
+    await expect(verifyButtons).toHaveCount(0);
     await page.getByRole('button', { name: 'Recommend for approval' }).click();
     await page.getByRole('dialog').getByLabel('Remarks for the reviewer').fill('Income evidence verified.');
     await page.getByRole('dialog').getByRole('button', { name: 'Recommend' }).click();

@@ -1,0 +1,52 @@
+# Render Blueprint for the JanSetu backend (Spring Boot, Docker).
+# Render dashboard → New → Blueprint → select this repository. Secrets marked `sync: false` are prompted for.
+# The frontend is deployed separately on Vercel (see frontend/vercel.json and docs/DEPLOYMENT_VERCEL_RENDER.md).
+services:
+  - type: web
+    name: jansetu-backend
+    runtime: docker
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    plan: free
+    region: singapore
+    healthCheckPath: /actuator/health/liveness
+    autoDeploy: true
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: production
+      - key: PORT
+        value: "8080"
+      # Neon: use the DIRECT host (without "-pooler") so Flyway migrations work, e.g.
+      # jdbc:postgresql://ep-xxxx.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channelBinding=require
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      # Output of scripts/generate-jwt-keys.sh
+      - key: JWT_PRIVATE_KEY
+        sync: false
+      - key: JWT_PUBLIC_KEY
+        sync: false
+      - key: JWT_ISSUER
+        value: https://jansetu-backend.onrender.com
+      - key: JWT_AUDIENCE
+        value: jansetu-api
+      - key: REFRESH_COOKIE_SECURE
+        value: "true"
+      # Your Vercel URL(s); wildcards allowed for preview deployments, comma separated.
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: APP_BASE_URL
+        sync: false
+      # First platform administrator (created once, must change password; remove afterwards).
+      - key: BOOTSTRAP_ADMIN_EMAIL
+        sync: false
+      - key: BOOTSTRAP_ADMIN_PASSWORD
+        sync: false
+      # Optional synthetic demo data: set SEED_ENABLED=true and a 12+ character SEED_DEMO_PASSWORD.
+      - key: SEED_ENABLED
+        value: "false"
+      - key: SEED_DEMO_PASSWORD
+        sync: false

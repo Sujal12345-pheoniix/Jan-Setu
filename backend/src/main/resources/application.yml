@@ -46,7 +46,7 @@ spring:
       enabled: true
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${PORT:${SERVER_PORT:8080}}
   shutdown: graceful
   error:
     include-stacktrace: never
@@ -122,5 +122,10 @@ jansetu:
     # Private directory for uploaded documents (outside any web root). Use object storage in shared deployments.
     local-dir: ${DOCUMENT_STORAGE_DIR:./storage/documents}
   seed:
-    enabled: false
+    # Synthetic demo data (departments, services, one account per role). Opt-in outside the local profile.
+    enabled: ${SEED_ENABLED:false}
     demo-password: ${SEED_DEMO_PASSWORD:}
+  bootstrap:
+    # One-time first platform administrator (see AdminBootstrap). Remove after the first start.
+    admin-email: ${BOOTSTRAP_ADMIN_EMAIL:}
+    admin-password: ${BOOTSTRAP_ADMIN_PASSWORD:}

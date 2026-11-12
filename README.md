@@ -1,7 +1,7 @@
 # JanSetu
 ## Enterprise Government-Style Service Delivery & Grievance Management Platform
 
-**Status:** Phase 1 (foundation and backend core) implemented. Frontend and case workflows are not yet implemented.  
+**Status:** Phase 1 (backend core) and Phase 2 (React frontend and case workflows) implemented. See docs/PHASE_2_REPORT.md and docs/DEPLOYMENT_VERCEL_RENDER.md.  
 **Documentation version:** 1.0.0  
 **Project type:** Portfolio / learning / reference implementation  
 **Important:** JanSetu is an independently developed simulation. It is not an official government portal, is not endorsed by a government body, and must not be represented as a real government or PSU deployment.

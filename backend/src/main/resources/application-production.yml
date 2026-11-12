@@ -4,16 +4,23 @@ spring:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    hikari:
+      # Managed Postgres (e.g. Neon free tier) has tight connection limits.
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:5}
 
-management:
-  server:
-    port: ${MANAGEMENT_PORT:8081}
+server:
+  # Behind a PaaS load balancer / reverse proxy: trust X-Forwarded-* for client IP and HTTPS scheme
+  # (rate limiting, audit IPs). Only deploy behind a proxy that overwrites these headers.
+  forward-headers-strategy: framework
+
+# Actuator stays on the application port so PaaS health checks can reach /actuator/health/liveness.
+# To isolate it on an internal port instead, set MANAGEMENT_SERVER_PORT (e.g. 8081) where the platform supports it.
 
 springdoc:
   api-docs:
-    enabled: false
+    enabled: ${API_DOCS_ENABLED:false}
   swagger-ui:
-    enabled: false
+    enabled: ${API_DOCS_ENABLED:false}
 
 logging:
   structured:

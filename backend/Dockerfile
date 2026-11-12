@@ -11,7 +11,8 @@ RUN ./mvnw -B -q -DskipTests package \
 
 # ---- Runtime stage -----------------------------------------------------------
 FROM eclipse-temurin:21-jre-jammy
-RUN groupadd --system jansetu && useradd --system --gid jansetu --no-create-home jansetu
+RUN groupadd --system jansetu && useradd --system --gid jansetu --no-create-home jansetu \
+    && mkdir -p /app/storage/documents && chown -R jansetu:jansetu /app/storage
 WORKDIR /app
 COPY --from=build /workspace/target/extracted/dependencies/ ./
 COPY --from=build /workspace/target/extracted/spring-boot-loader/ ./
@@ -19,7 +20,8 @@ COPY --from=build /workspace/target/extracted/snapshot-dependencies/ ./
 COPY --from=build /workspace/target/extracted/application/ ./
 USER jansetu
 EXPOSE 8080
+ENV PORT=8080 DOCUMENT_STORAGE_DIR=/app/storage/documents
 ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError"
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-  CMD ["bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /actuator/health/liveness HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+  CMD ["bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/${PORT:-8080} && printf 'GET /actuator/health/liveness HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
 ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]

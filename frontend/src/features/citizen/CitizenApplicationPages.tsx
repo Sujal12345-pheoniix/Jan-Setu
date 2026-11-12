@@ -201,7 +201,10 @@ function DraftWizard({ app }: { app: ApplicationDetail }) {
     mutationFn: () => applicationsApi.submit(app.summary.id, idempotencyKey.current),
     onSuccess: (result) => {
       setSubmitted(result.referenceNumber);
-      queryClient.invalidateQueries({ queryKey: ['applications'] });
+      // Refresh lists only: refetching this application now would switch to the tracking view and
+      // unmount the confirmation before the citizen sees their reference number.
+      queryClient.invalidateQueries({ queryKey: ['applications', 'mine'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       notify(`Application submitted. Reference ${result.referenceNumber}.`);
     },
     onError: (e) => {

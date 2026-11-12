@@ -44,3 +44,6 @@ frontend/playwright/.cache/
 
 # Playwright extra output dirs
 frontend/test-results*/
+
+# Playwright outputs
+frontend/test-results-*/

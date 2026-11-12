@@ -4,11 +4,11 @@ spring:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:5}
 
-management:
-  server:
-    # Actuator on an internal port that is not exposed through the public ingress.
-    port: ${MANAGEMENT_PORT:8081}
+server:
+  forward-headers-strategy: framework
 
 logging:
   structured:

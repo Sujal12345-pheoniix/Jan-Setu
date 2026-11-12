@@ -62,6 +62,12 @@ public class RoleAssignmentService {
         return new HashSet<>(assignmentRepository.findPermissionCodesByUserId(userId));
     }
 
+    /** Number of users holding a role (used by the one-time admin bootstrap). */
+    @Transactional(readOnly = true)
+    public long countUsersWithRole(String roleCode) {
+        return roleRepository.findByCode(roleCode).map(r -> assignmentRepository.countByRoleId(r.getId())).orElse(0L);
+    }
+
     /** Validates role codes and returns the union of their permissions. */
     @Transactional(readOnly = true)
     public Set<String> permissionsOfRoles(Set<String> roleCodes) {

@@ -79,7 +79,8 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource(SecurityProperties properties) {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(properties.cors().allowedOrigins());
+        // Patterns allow exact origins and wildcards such as https://jansetu-*.vercel.app (preview deployments).
+        config.setAllowedOriginPatterns(properties.cors().allowedOrigins());
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Idempotency-Key", "X-Request-Id", CLIENT_HEADER));
         config.setExposedHeaders(List.of("X-Request-Id", "Retry-After"));
