@@ -91,11 +91,11 @@ public class ReportService {
                              / nullif(count(*), 0) sla
                 from applications a
                 join service_versions sv on sv.id = a.service_version_id
-                where a.decided_at >= :from and a.decided_at < :to and """ + SCOPE, p);
+                where a.decided_at >= :from and a.decided_at < :to and\s""" + SCOPE, p);
         Map<String, Object> tasks = jdbc.queryForMap("""
                 select count(*) active,
                        count(*) filter (where due_at < :now and status <> 'BLOCKED') overdue
-                from workflow_tasks a where status in ('OPEN','ASSIGNED','IN_PROGRESS','BLOCKED') and """ + SCOPE, p);
+                from workflow_tasks a where status in ('OPEN','ASSIGNED','IN_PROGRESS','BLOCKED') and\s""" + SCOPE, p);
         Map<String, Long> grievances = new LinkedHashMap<>();
         jdbc.query("select status, count(*) c from grievances a where " + SCOPE + " group by status order by status",
                 p, rs -> { grievances.put(rs.getString("status"), rs.getLong("c")); });
@@ -112,9 +112,9 @@ public class ReportService {
         MapSqlParameterSource p = scope(actor, departmentId, range);
         return jdbc.query("""
                 select d::date bucket,
-                       (select count(*) from applications a where a.submitted_at >= d and a.submitted_at < d + interval '1 day' and """ + SCOPE + """
+                       (select count(*) from applications a where a.submitted_at >= d and a.submitted_at < d + interval '1 day' and\s""" + SCOPE + """
                        ) submitted,
-                       (select count(*) from applications a where a.decided_at >= d and a.decided_at < d + interval '1 day' and """ + SCOPE + """
+                       (select count(*) from applications a where a.decided_at >= d and a.decided_at < d + interval '1 day' and\s""" + SCOPE + """
                        ) decided
                 from generate_series(date_trunc('day', cast(:from as timestamptz) at time zone 'UTC') at time zone 'UTC',
                                      cast(:to as timestamptz) - interval '1 second', interval '1 day') d
@@ -162,10 +162,10 @@ public class ReportService {
                        coalesce(t.active, 0) active, coalesce(t.overdue, 0) overdue, coalesce(g.open, 0) open_grievances
                 from (select assignee_id, count(*) active,
                              count(*) filter (where due_at < :now and status <> 'BLOCKED') overdue
-                      from workflow_tasks a where status in ('OPEN','ASSIGNED','IN_PROGRESS','BLOCKED') and """ + SCOPE + """
+                      from workflow_tasks a where status in ('OPEN','ASSIGNED','IN_PROGRESS','BLOCKED') and\s""" + SCOPE + """
                       group by assignee_id) t
                 full outer join (select assignee_id, count(*) open from grievances a
-                      where status in ('ASSIGNED','IN_PROGRESS','REOPENED') and """ + SCOPE + """
+                      where status in ('ASSIGNED','IN_PROGRESS','REOPENED') and\s""" + SCOPE + """
                       group by assignee_id) g on g.assignee_id = t.assignee_id
                 left join users u on u.id = coalesce(t.assignee_id, g.assignee_id)
                 order by active desc nulls last""", p,
@@ -180,9 +180,9 @@ public class ReportService {
         MapSqlParameterSource p = scope(actor, departmentId, range);
         List<GrievancePoint> daily = jdbc.query("""
                 select d::date bucket,
-                       (select count(*) from grievances a where a.created_at >= d and a.created_at < d + interval '1 day' and """ + SCOPE + """
+                       (select count(*) from grievances a where a.created_at >= d and a.created_at < d + interval '1 day' and\s""" + SCOPE + """
                        ) opened,
-                       (select count(*) from grievances a where a.resolved_at >= d and a.resolved_at < d + interval '1 day' and """ + SCOPE + """
+                       (select count(*) from grievances a where a.resolved_at >= d and a.resolved_at < d + interval '1 day' and\s""" + SCOPE + """
                        ) resolved
                 from generate_series(date_trunc('day', cast(:from as timestamptz) at time zone 'UTC') at time zone 'UTC',
                                      cast(:to as timestamptz) - interval '1 second', interval '1 day') d

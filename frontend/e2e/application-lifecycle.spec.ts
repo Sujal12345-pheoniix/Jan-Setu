@@ -132,7 +132,7 @@ test.describe.serial('application lifecycle', () => {
     await cp.getByRole('button', { name: 'Sign in' }).click();
     await cp.goto(applicationUrl);
     await expect(cp.getByRole('heading', { name: 'Decision' })).toBeVisible();
-    await expect(cp.getByText('Approved for demonstration.')).toBeVisible();
+    await expect(cp.getByText('Approved for demonstration.').first()).toBeVisible();
     // internal recommendation remarks never reach the citizen
     await expect(cp.getByText('Income evidence verified.')).toHaveCount(0);
     await citizen.close();

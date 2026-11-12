@@ -28,7 +28,8 @@ Thumbs.db
 # Local data and uploads
 data/
 uploads/
-storage/
+/storage/
+backend/storage/
 *.dump
 *.sql.gz
 

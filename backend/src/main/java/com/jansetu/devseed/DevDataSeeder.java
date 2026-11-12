@@ -223,6 +223,7 @@ public class DevDataSeeder implements ApplicationRunner {
     }
 
     @SafeVarargs
+    @SuppressWarnings("varargs")
     private static Map<String, Object> fields(Map<String, Object>... fields) {
         Map<String, Object> schema = new LinkedHashMap<>();
         if (fields.length > 0) {

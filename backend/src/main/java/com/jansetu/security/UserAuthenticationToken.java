@@ -8,7 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /** Authentication carrying an {@link AuthenticatedUser}. Authorities = permission codes plus ROLE_ prefixed roles. */
-public class UserAuthenticationToken extends AbstractAuthenticationToken {
+public final class UserAuthenticationToken extends AbstractAuthenticationToken {
 
     private final AuthenticatedUser user;
 
