@@ -1,0 +1,22 @@
+sequenceDiagram
+  actor Citizen
+  participant UI as React
+  participant API as Spring Boot
+  participant Auth as Security/Policy
+  participant App as Application Service
+  participant DB as PostgreSQL
+  participant Outbox as Outbox Worker
+
+  Citizen->>UI: Submit application
+  UI->>API: POST /applications/{id}/submit
+  API->>Auth: Authenticate + authorize ownership
+  Auth-->>API: Authorized
+  API->>App: submit(command)
+  App->>DB: Begin transaction / load current version
+  App->>App: Validate schema, fields, documents, transition
+  App->>DB: Update state + task + history + audit + outbox
+  DB-->>App: Commit
+  App-->>API: Submission result
+  API-->>UI: Reference number + status
+  Outbox->>DB: Claim pending event
+  Outbox->>Outbox: Publish notification event

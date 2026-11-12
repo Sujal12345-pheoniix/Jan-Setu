@@ -1,0 +1,18 @@
+# Local developer profile. Uses synthetic data only.
+jansetu:
+  security:
+    jwt:
+      # When JWT_PRIVATE_KEY/JWT_PUBLIC_KEY are not set, an in-memory key pair is generated at startup.
+      # Tokens then become invalid after every restart, which is acceptable for local development only.
+      allow-ephemeral-keys: true
+    refresh:
+      cookie-secure: ${REFRESH_COOKIE_SECURE:false}
+  mail:
+    # Prints password-reset links to the console. Never enable outside local development.
+    log-body: true
+  seed:
+    enabled: ${SEED_ENABLED:true}
+
+logging:
+  level:
+    com.jansetu: DEBUG

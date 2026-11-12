@@ -1,0 +1,16 @@
+# Automated test profile. The datasource is supplied by Testcontainers.
+jansetu:
+  security:
+    jwt:
+      allow-ephemeral-keys: true
+    refresh:
+      cookie-secure: false
+    rate-limit:
+      auth-requests-per-minute: 10000
+  seed:
+    enabled: false
+
+logging:
+  level:
+    com.jansetu: INFO
+    org.testcontainers: WARN

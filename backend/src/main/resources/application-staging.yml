@@ -1,0 +1,16 @@
+# Staging: production-like, synthetic or masked data only. All secrets via environment/secret manager.
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+management:
+  server:
+    # Actuator on an internal port that is not exposed through the public ingress.
+    port: ${MANAGEMENT_PORT:8081}
+
+logging:
+  structured:
+    format:
+      console: ecs

@@ -1,0 +1,14 @@
+flowchart TB
+  Citizen[Citizen] --> Browser[React Web App]
+  Officer[Officer / Reviewer] --> Browser
+  Admin[Department / Platform Admin] --> Browser
+  Browser -->|HTTPS REST| API[Spring Boot Modular Monolith]
+  API --> DB[(PostgreSQL)]
+  API --> Storage[(Private Object Storage)]
+  API -. optional .-> Redis[(Redis)]
+  API -. outbox/events .-> Worker[Background Worker]
+  Worker -. optional .-> Kafka[(Kafka)]
+  Worker --> Email[Email Provider]
+  API --> Metrics[Actuator / Micrometer]
+  Metrics --> Prom[Prometheus]
+  Prom --> Grafana[Grafana]

@@ -1,0 +1,23 @@
+# Production profile. No defaults for secrets: startup fails if they are missing.
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+management:
+  server:
+    port: ${MANAGEMENT_PORT:8081}
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+logging:
+  structured:
+    format:
+      console: ecs
+  level:
+    com.jansetu: INFO
