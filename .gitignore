@@ -30,6 +30,7 @@ data/
 uploads/
 /storage/
 backend/storage/
+!backend/src/main/java/com/jansetu/integration/storage/
 *.dump
 *.sql.gz
 
